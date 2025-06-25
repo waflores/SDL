@@ -1,0 +1,34 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
+filegroup(
+    name = "srcs",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+
+# Building all targets with the `srcs` CMake project will fail.
+# this example demonstrates how users can avoid unnecessary targets
+cmake(
+    name = "sdl",
+    build_args = [
+        "--verbose",
+        "--",  # <- Pass remaining options to the native tool.
+        "-j 1",
+    ],
+    cache_entries = select({
+        "@bazel_tools//src/conditions:windows": {
+            "CMAKE_BUILD_TYPE": "Release",
+            # "CMAKE_CXX_FLAGS": "/MD",
+            # "CMAKE_CXX_FLAGS_DEBUG": "/MD",
+        },
+        "//conditions:default": {},
+    }),
+    # generate_args = select({
+    #     "@bazel_tools//src/conditions:windows": [
+    #         "-GNinja",
+    #         # "-A x64",
+    #     ],
+    #     "//conditions:default": [],
+    # }),
+    lib_source = ":srcs",
+)
