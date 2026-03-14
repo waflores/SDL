@@ -1,0 +1,14 @@
+diff --git a/cc/private/toolchain/windows_cc_toolchain_config.bzl b/cc/private/toolchain/windows_cc_toolchain_config.bzl
+index 125905e..7868bd9 100644
+--- a/cc/private/toolchain/windows_cc_toolchain_config.bzl
++++ b/cc/private/toolchain/windows_cc_toolchain_config.bzl
+@@ -794,7 +794,7 @@ def _impl(ctx):
+             "/wd4291",
+             "/wd4250",
+             "/wd4996",
+-        ]
++        ] + ctx.attr.default_compile_flags
+         if ctx.attr.win32_winnt_flag:
+             default_compile_flags_list.append(ctx.attr.win32_winnt_flag)
+
+        default_compile_flags_feature = feature(

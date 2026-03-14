@@ -11,7 +11,7 @@ bazel_dep(name = "rules_cc", version = "0.2.17")
 single_version_override(
     module_name = "rules_cc",
     patch_strip = 1,
-    patches = ["bazel/patches/rules_cc-windows_support.patch"],  # Add Windows support, patch of https://github.com/bazel-contrib/toolchains_llvm/pull/642
+    patches = ["build-scripts/bazel/patches/rules_cc-windows_support.patch"],  # Add Windows support, patch of https://github.com/bazel-contrib/toolchains_llvm/pull/642
 )
 
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
