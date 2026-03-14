@@ -1,30 +1,4 @@
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
-
-filegroup(
-    name = "srcs",
-    srcs = glob(["**"]),
-    visibility = ["//visibility:public"],
-)
-
-cmake(
-    # expect to find ./lib/hello.lib as the result of the build
-    name = "sdl",
-    # This option can be omitted
-    generate_args = [
-        "-G \"Visual Studio 17 2022\"",
-        "-A Win64",
-    ],
-    lib_source = ":srcs",
-)
-
-cmake(
-    name = "sdl_ninja",
-    # explicitly specify the generator
-    generate_args = ["-GNinja"],
-    # expect to find ./lib/hello.lib as the result of the build
-    lib_name = "sdl",
-    lib_source = ":srcs",
-)
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 platform(
     name = "x64_windows-clang-cl",
@@ -45,9 +19,6 @@ platform(
     ],
     visibility = ["//visibility:public"],
 )
-
-# buildifier: disable=module-docstring
-load("@rules_cc//cc:defs.bzl", "cc_library")
 
 cc_library(
     name = "atomic",
@@ -75,7 +46,10 @@ cc_library(
 
 cc_library(
     name = "camera",
-    srcs = glob(["src/camera/*.c", "src/camera/*.h"]) + select({
+    srcs = glob([
+        "src/camera/*.c",
+        "src/camera/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/camera/mediafoundation/*.c",
             "src/camera/dummy/*.c",
@@ -100,13 +74,19 @@ cc_library(
 
 cc_library(
     name = "cpuinfo",
-    srcs = glob(["src/cpuinfo/*.c", "src/cpuinfo/*.h"]),
+    srcs = glob([
+        "src/cpuinfo/*.c",
+        "src/cpuinfo/*.h",
+    ]),
     deps = [":sdl3_internal"],
 )
 
 cc_library(
     name = "dialog",
-    srcs = glob(["src/dialog/*.c", "src/dialog/*.h"]) + select({
+    srcs = glob([
+        "src/dialog/*.c",
+        "src/dialog/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/dialog/windows/*.c",
         ]),
@@ -117,19 +97,28 @@ cc_library(
 
 cc_library(
     name = "dynapi",
-    srcs = glob(["src/dynapi/*.c", "src/dynapi/*.h"]),
+    srcs = glob([
+        "src/dynapi/*.c",
+        "src/dynapi/*.h",
+    ]),
     deps = [":sdl3_internal"],
 )
 
 cc_library(
     name = "events",
-    srcs = glob(["src/events/*.c", "src/events/*.h"]),
+    srcs = glob([
+        "src/events/*.c",
+        "src/events/*.h",
+    ]),
     deps = [":sdl3_internal"],
 )
 
 cc_library(
     name = "filesystem",
-    srcs = glob(["src/filesystem/*.c", "src/filesystem/*.h"]) + select({
+    srcs = glob([
+        "src/filesystem/*.c",
+        "src/filesystem/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/filesystem/windows/*.c",
         ]),
@@ -140,7 +129,10 @@ cc_library(
 
 cc_library(
     name = "gpu",
-    srcs = glob(["src/gpu/*.c", "src/gpu/*.h"]) + select({
+    srcs = glob([
+        "src/gpu/*.c",
+        "src/gpu/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/gpu/d3d12/*.c",
             "src/gpu/d3d12/*.h",
@@ -154,7 +146,10 @@ cc_library(
 
 cc_library(
     name = "haptic",
-    srcs = glob(["src/haptic/*.c", "src/haptic/*.h"]) + select({
+    srcs = glob([
+        "src/haptic/*.c",
+        "src/haptic/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/haptic/windows/*.c",
             "src/haptic/windows/*.h",
@@ -166,14 +161,17 @@ cc_library(
 
 cc_library(
     name = "hidapi",
-    hdrs = select({
+    srcs = glob([
+        "src/hidapi/*.c",
+        "src/hidapi/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/hidapi/windows/*.c",
             "src/hidapi/windows/*.h",
         ]),
         "//conditions:default": [],
     }),
-    srcs = glob(["src/hidapi/*.c", "src/hidapi/*.h"]) + select({
+    hdrs = select({
         "@platforms//os:windows": glob([
             "src/hidapi/windows/*.c",
             "src/hidapi/windows/*.h",
@@ -185,7 +183,10 @@ cc_library(
 
 cc_library(
     name = "io",
-    srcs = glob(["src/io/*.c", "src/io/*.h"]) + select({
+    srcs = glob([
+        "src/io/*.c",
+        "src/io/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/io/windows/*.c",
             "src/io/generic/*.c",
@@ -197,7 +198,10 @@ cc_library(
 
 cc_library(
     name = "joystick",
-    srcs = glob(["src/joystick/*.c", "src/joystick/*.h"]) + select({
+    srcs = glob([
+        "src/joystick/*.c",
+        "src/joystick/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/joystick/windows/*.c",
             "src/joystick/windows/*.h",
@@ -213,7 +217,10 @@ cc_library(
 
 cc_library(
     name = "libm",
-    srcs = glob(["src/libm/*.c", "src/libm/*.h"]),
+    srcs = glob([
+        "src/libm/*.c",
+        "src/libm/*.h",
+    ]),
     deps = [":sdl3_internal"],
 )
 
@@ -230,7 +237,10 @@ cc_library(
 
 cc_library(
     name = "locale",
-    srcs = glob(["src/locale/*.c", "src/locale/*.h"]) + select({
+    srcs = glob([
+        "src/locale/*.c",
+        "src/locale/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/locale/windows/*.c",
         ]),
@@ -241,7 +251,10 @@ cc_library(
 
 cc_library(
     name = "misc",
-    srcs = glob(["src/misc/*.c", "src/misc/*.h"]) + select({
+    srcs = glob([
+        "src/misc/*.c",
+        "src/misc/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/misc/windows/*.c",
         ]),
@@ -252,7 +265,10 @@ cc_library(
 
 cc_library(
     name = "power",
-    srcs = glob(["src/power/*.c", "src/power/*.h"]) + select({
+    srcs = glob([
+        "src/power/*.c",
+        "src/power/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/power/windows/*.c",
         ]),
@@ -263,7 +279,10 @@ cc_library(
 
 cc_library(
     name = "process",
-    srcs = glob(["src/process/*.c", "src/process/*.h"]) + select({
+    srcs = glob([
+        "src/process/*.c",
+        "src/process/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/process/windows/*.c",
         ]),
@@ -274,7 +293,10 @@ cc_library(
 
 cc_library(
     name = "render",
-    srcs = glob(["src/render/*.c", "src/render/*.h"]) + select({
+    srcs = glob([
+        "src/render/*.c",
+        "src/render/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/render/direct3d/*.c",
             "src/render/direct3d/*.h",
@@ -300,7 +322,10 @@ cc_library(
 
 cc_library(
     name = "sensor",
-    srcs = glob(["src/sensor/*.c", "src/sensor/*.h"]) + select({
+    srcs = glob([
+        "src/sensor/*.c",
+        "src/sensor/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/sensor/windows/*.c",
             "src/sensor/windows/*.h",
@@ -314,13 +339,19 @@ cc_library(
 
 cc_library(
     name = "stdlib",
-    srcs = glob(["src/stdlib/*.c", "src/stdlib/*.h"]),
+    srcs = glob([
+        "src/stdlib/*.c",
+        "src/stdlib/*.h",
+    ]),
     deps = [":sdl3_internal"],
 )
 
 cc_library(
     name = "storage",
-    srcs = glob(["src/storage/*.c", "src/storage/*.h"]) + select({
+    srcs = glob([
+        "src/storage/*.c",
+        "src/storage/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/storage/generic/*.c",
             "src/storage/steam/*.c",
@@ -339,7 +370,10 @@ cc_library(
 
 cc_library(
     name = "thread",
-    srcs = glob(["src/thread/*.c", "src/thread/*.h"]) + select({
+    srcs = glob([
+        "src/thread/*.c",
+        "src/thread/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/thread/windows/*.c",
             "src/thread/windows/*.h",
@@ -353,7 +387,10 @@ cc_library(
 
 cc_library(
     name = "time",
-    srcs = glob(["src/time/*.c", "src/time/*.h"]) + select({
+    srcs = glob([
+        "src/time/*.c",
+        "src/time/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/time/windows/*.c",
         ]),
@@ -364,7 +401,10 @@ cc_library(
 
 cc_library(
     name = "timer",
-    srcs = glob(["src/timer/*.c", "src/timer/*.h"]) + select({
+    srcs = glob([
+        "src/timer/*.c",
+        "src/timer/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/timer/windows/*.c",
         ]),
@@ -375,7 +415,10 @@ cc_library(
 
 cc_library(
     name = "tray",
-    srcs = glob(["src/tray/*.c", "src/tray/*.h"]) + select({
+    srcs = glob([
+        "src/tray/*.c",
+        "src/tray/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/tray/windows/*.c",
         ]),
@@ -386,7 +429,10 @@ cc_library(
 
 cc_library(
     name = "video",
-    srcs = glob(["src/video/*.c", "src/video/*.h"]) + select({
+    srcs = glob([
+        "src/video/*.c",
+        "src/video/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/video/windows/*.c",
             "src/video/windows/*.h",
@@ -405,24 +451,27 @@ cc_library(
 
 cc_library(
     name = "sdl3_headers",
+    hdrs = glob(["include/SDL3/*.h"]),
     includes = ["include"],
     strip_include_prefix = "include",
-    hdrs = glob(["include/SDL3/*.h"]),
 )
 
 cc_library(
     name = "build_config",
-    strip_include_prefix = "include/build_config",
     hdrs = glob(["include/build_config/*.h"]),
+    strip_include_prefix = "include/build_config",
 )
 
 cc_library(
     name = "sdl3_internal",
-    strip_include_prefix = "src",
+    srcs = glob([
+        "src/*.c",
+        "src/*.h",
+    ]),
     hdrs = glob([
         "src/**/*.h",
     ]),
-    srcs = glob(["src/*.c", "src/*.h"]),
+    strip_include_prefix = "src",
     deps = [
         ":build_config",
         ":sdl3_headers",
@@ -431,57 +480,46 @@ cc_library(
 
 cc_library(
     name = "main_use_callbacks",
-    visibility = ["//visibility:public"],
-    defines = ["SDL_MAIN_USE_CALLBACKS"],
-    deps = [":sdl3_internal", ":sdl3"],
-    srcs = glob(["src/main/*.c", "src/main/*.h"]) + select({
+    srcs = glob([
+        "src/main/*.c",
+        "src/main/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/main/windows/*.c",
             "src/main/generic/*.c",
         ]),
         "//conditions:default": [],
     }),
+    defines = ["SDL_MAIN_USE_CALLBACKS"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":sdl3",
+        ":sdl3_internal",
+    ],
 )
 
 cc_library(
     name = "main",
-    visibility = ["//visibility:public"],
-    deps = [":sdl3_internal", ":sdl3"],
-    srcs = glob(["src/main/*.c", "src/main/*.h"]) + select({
+    srcs = glob([
+        "src/main/*.c",
+        "src/main/*.h",
+    ]) + select({
         "@platforms//os:windows": glob([
             "src/main/windows/*.c",
             "src/main/generic/*.c",
         ]),
         "//conditions:default": [],
     }),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":sdl3",
+        ":sdl3_internal",
+    ],
 )
 
 cc_library(
     name = "sdl3",
-    visibility = ["//visibility:public"],
-    linkopts = select({
-        "@rules_cc//cc/compiler:msvc-cl": [
-            "/WX:4006",
-            "/DEFAULTLIB:user32",
-            "/DEFAULTLIB:gdi32",
-            "/DEFAULTLIB:winmm",
-            "/DEFAULTLIB:imm32",
-            "/DEFAULTLIB:ole32",
-            "/DEFAULTLIB:oleaut32",
-            "/DEFAULTLIB:version",
-            "/DEFAULTLIB:uuid",
-            "/DEFAULTLIB:shell32",
-            "/DEFAULTLIB:advapi32",
-            "/DEFAULTLIB:hid",
-            "/DEFAULTLIB:setupapi",
-            "/DEFAULTLIB:opengl32",
-            "/DEFAULTLIB:kernel32",
-        ],
-        "//conditions:default": [],
-    }),
-    deps = [":sdl3_headers"],
     implementation_deps = [
-        ":sdl3_internal",
         ":atomic",
         ":audio",
         ":camera",
@@ -503,6 +541,7 @@ cc_library(
         ":power",
         ":process",
         ":render",
+        ":sdl3_internal",
         ":sensor",
         ":stdlib",
         ":storage",
@@ -513,4 +552,26 @@ cc_library(
         ":tray",
         ":video",
     ],
+    linkopts = select({
+        "@rules_cc//cc/compiler:msvc-cl": [
+            "/WX:4006",
+            "/DEFAULTLIB:user32",
+            "/DEFAULTLIB:gdi32",
+            "/DEFAULTLIB:winmm",
+            "/DEFAULTLIB:imm32",
+            "/DEFAULTLIB:ole32",
+            "/DEFAULTLIB:oleaut32",
+            "/DEFAULTLIB:version",
+            "/DEFAULTLIB:uuid",
+            "/DEFAULTLIB:shell32",
+            "/DEFAULTLIB:advapi32",
+            "/DEFAULTLIB:hid",
+            "/DEFAULTLIB:setupapi",
+            "/DEFAULTLIB:opengl32",
+            "/DEFAULTLIB:kernel32",
+        ],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [":sdl3_headers"],
 )

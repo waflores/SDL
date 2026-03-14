@@ -174,3 +174,4 @@ doxygen_warn.txt
 
 # Ignore user bazel config
 user.bazelrc
+bazel-*
