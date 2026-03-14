@@ -1,379 +1,5 @@
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("@rules_cc//cc:objc_library.bzl", "objc_library")
-load("@rules_cc_autoconf//autoconf:autoconf.bzl", "autoconf")
-load("@rules_cc_autoconf//autoconf:autoconf_hdr.bzl", "autoconf_hdr")
-load("@rules_license//rules:license.bzl", "license")
-load(
-    ":sdl2_config_checks.bzl",
-    "SDL2_CONFIG_CHECKS_COMMON",
-    "SDL2_CONFIG_CHECKS_LINUX",
-    "SDL2_CONFIG_CHECKS_MACOS",
-    "SDL2_CONFIG_CHECKS_NON_WINDOWS",
-    "SDL2_CONFIG_CHECKS_WINDOWS",
-)
-load(
-    ":wayland_protocols.bzl",
-    "WAYLAND_PROTOCOL_HDRS",
-    "WAYLAND_PROTOCOL_SRCS",
-    "declare_wayland_protocols",
-)
-
-package(
-    default_applicable_licenses = [":license"],
-)
-
-license(
-    name = "license",
-    license_kinds = ["@rules_license//licenses/spdx:Zlib"],
-    license_text = "LICENSE.txt",
-)
-
-exports_files([
-    "LICENSE.txt",
-])
-
-COMMON_SRCS = glob(
-    [
-        "src/*.c",
-        "src/atomic/*.c",
-        "src/audio/*.c",
-        "src/audio/disk/*.c",
-        "src/audio/dummy/*.c",
-        "src/cpuinfo/*.c",
-        "src/dynapi/*.c",
-        "src/events/*.c",
-        "src/file*/*.c",
-        "src/haptic/*.c",
-        "src/hidapi/*.c",
-        "src/joystick/*.c",
-        "src/joystick/hidapi/*.c",
-        "src/joystick/*steam*.c",
-        "src/libm/*.c",
-        "src/locale/*.c",
-        "src/misc/*.c",
-        "src/power/*.c",
-        "src/render/*.c",
-        "src/render/opengl/*.c",
-        "src/render/opengles2/*.c",
-        "src/render/software/*.c",
-        "src/sensor/*.c",
-        "src/sensor/dummy/*.c",
-        "src/stdlib/*.c",
-        "src/thread/*.c",
-        "src/timer/*.c",
-        "src/video/*.c",
-        "src/video/dummy/*.c",
-        "src/video/yuv2rgb/*.c",
-    ],
-    exclude = [
-        "src/video/yuv2rgb/yuv_rgb_sse.c",
-    ],
-)
-
-X86_ONLY_SRCS = [
-    "src/video/yuv2rgb/yuv_rgb_sse.c",
-]
-
-declare_wayland_protocols()
-
-LINUX_SRCS = glob(
-    [
-        "src/audio/alsa/*.c",
-        "src/audio/dsp/*.c",
-        "src/core/linux/*.c",
-        "src/core/unix/*.c",
-        "src/filesystem/unix/*.c",
-        "src/haptic/linux/*.c",
-        "src/joystick/linux/*.c",
-        "src/loadso/dlopen/*.c",
-        "src/locale/unix/*.c",
-        "src/misc/unix/*.c",
-        "src/power/linux/*.c",
-        "src/thread/pthread/*.c",
-        "src/timer/unix/*.c",
-        "src/video/wayland/*.c",
-        "src/video/x11/*.c",
-    ],
-    exclude = [
-        "src/core/linux/SDL_dbus.c",
-        "src/core/linux/SDL_fcitx.c",
-        "src/core/linux/SDL_ibus.c",
-        "src/core/linux/SDL_ime.c",
-        "src/core/linux/SDL_udev.c",
-    ],
-)
-
-WINDOWS_SRCS = glob([
-    "src/audio/directsound/*.c",
-    "src/audio/wasapi/*.c",
-    "src/audio/directsound/*.c",
-    "src/core/windows/*.c",
-    "src/filesystem/windows/*.c",
-    "src/haptic/windows/*.c",
-    "src/joystick/windows/*.c",
-    "src/loadso/windows/*.c",
-    "src/locale/windows/*.c",
-    "src/misc/windows/*.c",
-    "src/power/windows/*.c",
-    "src/render/direct3d/*.c",
-    "src/render/direct3d11/*.c",
-    "src/render/direct3d12/*.c",
-    "src/sensor/windows/*.c",
-    "src/thread/windows/*.c",
-    "src/thread/generic/SDL_syscond.c",
-    "src/timer/windows/*.c",
-    "src/video/windows/*.c",
-])
-
-MACOS_SRCS = glob([
-    "src/core/unix/*.c",
-    "src/haptic/darwin/*.c",
-    "src/joystick/darwin/*.c",
-    "src/loadso/dlopen/*.c",
-    "src/power/macos*/*.c",
-    "src/thread/pthread/*.c",
-    "src/timer/unix/*.c",
-])
-
-objc_library(
-    name = "sdl2_macos_objc",
-    srcs = glob([
-        "src/audio/coreaudio/*.m",
-        "src/file*/cocoa/*.m",
-        "src/filesystem/cocoa/*.m",
-        "src/joystick/apple/*.m",
-        "src/locale/macos*/*.m",
-        "src/misc/macos*/*.m",
-        "src/render/metal/*.m",
-        "src/video/cocoa/*.m",
-    ]),
-    sdk_frameworks = [
-        "AudioToolbox",
-        "AVFoundation",
-        "Carbon",
-        "Cocoa",
-        "CoreAudio",
-        "CoreVideo",
-        "Foundation",
-    ],
-    tags = ["manual"],
-    weak_sdk_frameworks = [
-        "CoreHaptics",
-        "GameController",
-        "Metal",
-        "QuartzCore",
-    ],
-    deps = [
-        ":sdl2_config_header",
-        ":sdl2_headers",
-        ":sdl2_private_headers",
-    ],
-)
-
-WINDOWS_LINKOPTS = [
-    "advapi32.lib",
-    "dinput8.lib",
-    "gdi32.lib",
-    "imm32.lib",
-    "kernel32.lib",
-    "ole32.lib",
-    "oleaut32.lib",
-    "setupapi.lib",
-    "shell32.lib",
-    "user32.lib",
-    "uuid.lib",
-    "version.lib",
-    "winmm.lib",
-]
-
-LINUX_LINKOPTS = [
-    "-ldl",
-    "-lpthread",
-    "-lrt",
-]
-
-cc_library(
-    name = "sdl2_headers",
-    hdrs = glob(
-        ["include/**/*.h"],
-        exclude = ["include/SDL_config.h"],
-    ),
-    strip_include_prefix = "include",
-    visibility = ["//visibility:public"],
-    deps = [
-        ":sdl2_config_header",
-        ":sdl3_internal",
-    ],
-)
-
-cc_library(
-    name = "sdl3_internal",
-    srcs = glob([
-        "src/*.c",
-        "src/*.h",
-    ]),
-    hdrs = glob([
-        "src/**/*.h",
-    ]),
-    strip_include_prefix = "src",
-)
-
-autoconf(
-    name = "sdl2_config_checks",
-    checks = SDL2_CONFIG_CHECKS_COMMON + select({
-        "@platforms//os:windows": SDL2_CONFIG_CHECKS_WINDOWS,
-        "//conditions:default": SDL2_CONFIG_CHECKS_NON_WINDOWS,
-    }) + select({
-        "@platforms//os:linux": SDL2_CONFIG_CHECKS_LINUX,
-        "@platforms//os:macos": SDL2_CONFIG_CHECKS_MACOS,
-        "//conditions:default": [],
-    }),
-)
-
-autoconf_hdr(
-    name = "gen_sdl_config_h",
-    out = "generated/SDL_build_config.h",
-    substitutions = {
-        "#error You should run git checkout -f include/SDL_config.h": "/* Bazel-generated SDL_config.h */",
-    },
-    template = "include/SDL_build_config.h.in",
-    deps = [":sdl2_config_checks"],
-)
-
-cc_library(
-    name = "maybe_generated",
-    hdrs = ["include/build_config/SDL_build_config.h"] + select(
-        {
-            "@platforms//os:windows": ["include/build_config/SDL_build_config_windows.h"],
-            "@platforms//os:linux": ["include/build_config/SDL_build_config_minimal.h"],
-            "@platforms//os:macos": ["include/build_config/SDL_build_config_macos.h"],
-            "//conditions:default": [],
-        },
-    ),
-    # deps = [":sdl2_config_checks"],
-)
-
-cc_library(
-    name = "sdl2_config_header",
-    hdrs = [":build_config"],
-)
-
-cc_library(
-    name = "build_config",
-    hdrs = glob(["include/build_config/*.h"]),
-    strip_include_prefix = "include/build_config",
-)
-
-cc_library(
-    name = "sdl2_private_headers",
-    hdrs = glob(["src/**/*.h"]),
-    visibility = ["//:__subpackages__"],
-    deps = [
-        ":sdl2_config_header",
-        ":sdl2_headers",
-    ],
-)
-
-cc_library(
-    name = "sdl2",
-    srcs = COMMON_SRCS + select({
-        "@platforms//os:linux": LINUX_SRCS + WAYLAND_PROTOCOL_SRCS,
-        "@platforms//os:macos": MACOS_SRCS,
-        "@platforms//os:windows": WINDOWS_SRCS,
-        "//conditions:default": [],
-    }) + select({
-        "@platforms//cpu:x86_64": X86_ONLY_SRCS,
-        "//conditions:default": [],
-    }),
-    implementation_deps = select({
-        "@platforms//os:linux": [
-            "@alsa_lib",
-            "@egl-registry//:EGL_headers",
-            "@libx11",
-            "@libxcursor",
-            "@libxext",
-            "@libxfixes",
-            "@libxi",
-            "@libxrandr",
-            "@opengl-registry//:GLES2_headers",
-            "@wayland//:wayland_client",
-            "@wayland//:wayland_cursor",
-            "@wayland//:wayland_egl",
-            "@xkbcommon",
-        ],
-        "@platforms//os:macos": [":sdl2_macos_objc"],
-        "//conditions:default": [],
-    }) + [":sdl2_private_headers"],
-    includes = select({
-        "@platforms//os:linux": ["generated/wayland-protocols"],
-        "//conditions:default": [],
-    }),
-    linkopts = select({
-        "@platforms//os:linux": LINUX_LINKOPTS,
-        "@platforms//os:macos": [
-            "-liconv",
-            "-framework",
-            "AudioToolbox",
-            "-framework",
-            "AVFoundation",
-            "-framework",
-            "Carbon",
-            "-framework",
-            "Cocoa",
-            "-framework",
-            "CoreAudio",
-            "-framework",
-            "CoreVideo",
-            "-framework",
-            "ForceFeedback",
-            "-framework",
-            "Foundation",
-            "-framework",
-            "IOKit",
-            "-weak_framework",
-            "Metal",
-            "-weak_framework",
-            "QuartzCore",
-        ],
-        "@platforms//os:windows": WINDOWS_LINKOPTS,
-        "//conditions:default": [],
-    }),
-    local_defines = select({
-        "@platforms//os:macos": ["SDL_HIDAPI_DISABLED"],
-        "@platforms//os:windows": ["SDL_THREAD_GENERIC_COND_SUFFIX"],
-        "//conditions:default": [],
-    }),
-    textual_hdrs = [
-        "src/thread/generic/SDL_syssem.c",
-    ] + select({
-        "@platforms//os:linux": WAYLAND_PROTOCOL_HDRS,
-        "@platforms//os:windows": ["src/hidapi/windows/hid.c"],
-        "//conditions:default": [],
-    }),
-    visibility = ["//visibility:public"],
-    deps = [
-        ":sdl2_config_header",
-        ":sdl2_headers",
-    ],
-)
-
-cc_test(
-    name = "sdl2_consumer_link_test",
-    srcs = ["sdl2_consumer_link_test.cc"],
-    deps = [":sdl2"],
-)
-
-cc_test(
-    name = "sdl2_headers_consumer_compile_test",
-    srcs = ["sdl2_headers_consumer_compile_test.cc"],
-    deps = [":sdl2_headers"],
-)
-
-alias(
-    name = "SDL2",
-    actual = ":sdl2",
-    visibility = ["//visibility:public"],
-)
+# buildifier: disable=module-docstring
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 platform(
     name = "x64_windows-clang-cl",
@@ -393,4 +19,560 @@ platform(
         "@rules_cc//cc/private/toolchain:msvc",  # Alias to the @rules_cc constraint in Bazel 8+
     ],
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "atomic",
+    srcs = glob(["src/atomic/*.c"]),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "audio",
+    srcs = glob(["src/audio/*.c"]) + select({
+        "@platforms//os:windows": glob([
+            "src/audio/wasapi/*.h",
+            "src/audio/wasapi/*.c",
+            "src/audio/directsound/*.h",
+            "src/audio/directsound/*.c",
+            "src/audio/disk/*.h",
+            "src/audio/disk/*.c",
+            "src/audio/dummy/*.h",
+            "src/audio/dummy/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "camera",
+    srcs = glob([
+        "src/camera/*.c",
+        "src/camera/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/camera/mediafoundation/*.c",
+            "src/camera/dummy/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "core",
+    srcs = glob(["src/core/*.c"]) + select({
+        "@platforms//os:windows": glob([
+            "src/core/windows/*.c",
+            "src/core/windows/*.cpp",
+            "src/core/windows/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "cpuinfo",
+    srcs = glob([
+        "src/cpuinfo/*.c",
+        "src/cpuinfo/*.h",
+    ]),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "dialog",
+    srcs = glob([
+        "src/dialog/*.c",
+        "src/dialog/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/dialog/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "dynapi",
+    srcs = glob([
+        "src/dynapi/*.c",
+        "src/dynapi/*.h",
+    ]),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "events",
+    srcs = glob([
+        "src/events/*.c",
+        "src/events/*.h",
+    ]),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "filesystem",
+    srcs = glob([
+        "src/filesystem/*.c",
+        "src/filesystem/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/filesystem/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "gpu",
+    srcs = glob([
+        "src/gpu/*.c",
+        "src/gpu/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/gpu/d3d12/*.c",
+            "src/gpu/d3d12/*.h",
+            "src/gpu/vulkan/*.c",
+            "src/gpu/vulkan/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "haptic",
+    srcs = glob([
+        "src/haptic/*.c",
+        "src/haptic/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/haptic/windows/*.c",
+            "src/haptic/windows/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "hidapi",
+    srcs = glob([
+        "src/hidapi/*.c",
+        "src/hidapi/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/hidapi/windows/*.c",
+            "src/hidapi/windows/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    hdrs = select({
+        "@platforms//os:windows": glob([
+            "src/hidapi/windows/*.c",
+            "src/hidapi/windows/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "io",
+    srcs = glob([
+        "src/io/*.c",
+        "src/io/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/io/windows/*.c",
+            "src/io/generic/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "joystick",
+    srcs = glob([
+        "src/joystick/*.c",
+        "src/joystick/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/joystick/windows/*.c",
+            "src/joystick/windows/*.h",
+            "src/joystick/virtual/*.c",
+            "src/joystick/virtual/*.h",
+            "src/joystick/hidapi/*.c",
+            "src/joystick/hidapi/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "libm",
+    srcs = glob([
+        "src/libm/*.c",
+        "src/libm/*.h",
+    ]),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "loadso",
+    srcs = select({
+        "@platforms//os:windows": glob([
+            "src/loadso/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "locale",
+    srcs = glob([
+        "src/locale/*.c",
+        "src/locale/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/locale/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "misc",
+    srcs = glob([
+        "src/misc/*.c",
+        "src/misc/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/misc/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "power",
+    srcs = glob([
+        "src/power/*.c",
+        "src/power/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/power/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "process",
+    srcs = glob([
+        "src/process/*.c",
+        "src/process/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/process/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "render",
+    srcs = glob([
+        "src/render/*.c",
+        "src/render/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/render/direct3d/*.c",
+            "src/render/direct3d/*.h",
+            "src/render/direct3d11/*.c",
+            "src/render/direct3d11/*.h",
+            "src/render/direct3d12/*.c",
+            "src/render/direct3d12/*.h",
+            "src/render/gpu/*.c",
+            "src/render/gpu/*.h",
+            "src/render/opengl/*.c",
+            "src/render/opengl/*.h",
+            "src/render/opengles2/*.c",
+            "src/render/opengles2/*.h",
+            "src/render/software/*.c",
+            "src/render/software/*.h",
+            "src/render/vulkan/*.c",
+            "src/render/vulkan/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "sensor",
+    srcs = glob([
+        "src/sensor/*.c",
+        "src/sensor/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/sensor/windows/*.c",
+            "src/sensor/windows/*.h",
+            "src/sensor/dummy/*.c",
+            "src/sensor/dummy/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "stdlib",
+    srcs = glob([
+        "src/stdlib/*.c",
+        "src/stdlib/*.h",
+    ]),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "storage",
+    srcs = glob([
+        "src/storage/*.c",
+        "src/storage/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/storage/generic/*.c",
+            "src/storage/steam/*.c",
+            "src/storage/steam/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "test",
+    srcs = glob(["src/test/*.c"]),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "thread",
+    srcs = glob([
+        "src/thread/*.c",
+        "src/thread/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/thread/windows/*.c",
+            "src/thread/windows/*.h",
+            "src/thread/generic/*.c",
+            "src/thread/generic/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "time",
+    srcs = glob([
+        "src/time/*.c",
+        "src/time/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/time/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "timer",
+    srcs = glob([
+        "src/timer/*.c",
+        "src/timer/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/timer/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "tray",
+    srcs = glob([
+        "src/tray/*.c",
+        "src/tray/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/tray/windows/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "video",
+    srcs = glob([
+        "src/video/*.c",
+        "src/video/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/video/windows/*.c",
+            "src/video/windows/*.h",
+            "src/video/offscreen/*.c",
+            "src/video/offscreen/*.h",
+            "src/video/dummy/*.c",
+            "src/video/dummy/*.h",
+            "src/video/directx/*.h",
+            "src/video/yuv2rgb/*.c",
+            "src/video/yuv2rgb/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
+    deps = [":sdl3_internal"],
+)
+
+cc_library(
+    name = "sdl3_headers",
+    hdrs = glob(["include/SDL3/*.h"]),
+    includes = ["include"],
+    strip_include_prefix = "include",
+)
+
+cc_library(
+    name = "build_config",
+    hdrs = glob(["include/build_config/*.h"]),
+    strip_include_prefix = "include/build_config",
+)
+
+cc_library(
+    name = "sdl3_internal",
+    srcs = glob([
+        "src/*.c",
+        "src/*.h",
+    ]),
+    hdrs = glob([
+        "src/**/*.h",
+    ]),
+    strip_include_prefix = "src",
+    deps = [
+        ":build_config",
+        ":sdl3_headers",
+    ],
+)
+
+cc_library(
+    name = "main_use_callbacks",
+    srcs = glob([
+        "src/main/*.c",
+        "src/main/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/main/windows/*.c",
+            "src/main/generic/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    defines = ["SDL_MAIN_USE_CALLBACKS"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":sdl3",
+        ":sdl3_internal",
+    ],
+)
+
+cc_library(
+    name = "main",
+    srcs = glob([
+        "src/main/*.c",
+        "src/main/*.h",
+    ]) + select({
+        "@platforms//os:windows": glob([
+            "src/main/windows/*.c",
+            "src/main/generic/*.c",
+        ]),
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":sdl3",
+        ":sdl3_internal",
+    ],
+)
+
+cc_library(
+    name = "sdl3",
+    implementation_deps = [
+        ":atomic",
+        ":audio",
+        ":camera",
+        ":core",
+        ":cpuinfo",
+        ":dialog",
+        ":dynapi",
+        ":events",
+        ":filesystem",
+        ":gpu",
+        ":haptic",
+        ":hidapi",
+        ":io",
+        ":joystick",
+        ":libm",
+        ":loadso",
+        ":locale",
+        ":misc",
+        ":power",
+        ":process",
+        ":render",
+        ":sdl3_internal",
+        ":sensor",
+        ":stdlib",
+        ":storage",
+        ":test",
+        ":thread",
+        ":time",
+        ":timer",
+        ":tray",
+        ":video",
+    ],
+    linkopts = select({
+        "@rules_cc//cc/compiler:msvc-cl": [
+            "/WX:4006",
+            "/DEFAULTLIB:user32",
+            "/DEFAULTLIB:gdi32",
+            "/DEFAULTLIB:winmm",
+            "/DEFAULTLIB:imm32",
+            "/DEFAULTLIB:ole32",
+            "/DEFAULTLIB:oleaut32",
+            "/DEFAULTLIB:version",
+            "/DEFAULTLIB:uuid",
+            "/DEFAULTLIB:shell32",
+            "/DEFAULTLIB:advapi32",
+            "/DEFAULTLIB:hid",
+            "/DEFAULTLIB:setupapi",
+            "/DEFAULTLIB:opengl32",
+            "/DEFAULTLIB:kernel32",
+        ],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [":sdl3_headers"],
 )

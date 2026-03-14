@@ -50,11 +50,14 @@ git_override(
 bazel_dep(name = "rules_foreign_cc")
 git_override(
     module_name = "rules_foreign_cc",
-    commit = "16566f37f1220b996efc265ab848a2d3f52a488c",
+    commit = "599e636d45f64e38d74a54208d2e8037d017bf94",
     remote = "https://github.com/bazel-contrib/rules_foreign_cc.git",
+    patches = ["rules_foreign_cc-bzlv9.patch"],
+    patch_strip = 1,
 )
 
 tools = use_extension("@rules_foreign_cc//foreign_cc:extensions.bzl", "tools")
+use_repo(tools, "gettext_runtime", "glib_dev", "glib_src")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
@@ -73,3 +76,4 @@ bazel_dep(name = "rules_cc_autoconf", version = "0.5.6")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "wayland", version = "1.24.0.bcr.1")
 bazel_dep(name = "xkbcommon", version = "1.9.2.bcr.beta.1")
+# bazel_dep(name = "glib", version = "2.82.2.bcr.8")

@@ -1,0 +1,28 @@
+diff --git a/toolchains/built_toolchains.bzl b/toolchains/built_toolchains.bzl
+index c74dea4..238b002 100644
+--- a/toolchains/built_toolchains.bzl
++++ b/toolchains/built_toolchains.bzl
+@@ -282,6 +282,7 @@ def _pkgconfig_toolchain(version, register_toolchains):
+         http_archive,
+         name = "glib_dev",
+         build_file_content = '''
++load("@rules_cc//cc:cc_import.bzl", "cc_import")
+ cc_import(
+     name = "glib_dev",
+     hdrs = glob(["include/**"]),
+@@ -300,6 +301,7 @@ cc_import(
+         http_archive,
+         name = "glib_src",
+         build_file_content = '''
++load("@rules_cc//cc:cc_import.bzl", "cc_import")
+ cc_import(
+     name = "msvc_hdr",
+     hdrs = ["msvc_recommended_pragmas.h"],
+@@ -340,6 +342,7 @@ exports_files(
+         http_archive,
+         name = "gettext_runtime",
+         build_file_content = '''
++load("@rules_cc//cc:cc_import.bzl", "cc_import")
+ cc_import(
+     name = "gettext_runtime",
+     shared_library = "bin/libintl-8.dll",
