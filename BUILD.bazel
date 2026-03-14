@@ -5,30 +5,23 @@ filegroup(
     srcs = glob(["**"]),
     visibility = ["//visibility:public"],
 )
-
-# Building all targets with the `srcs` CMake project will fail.
-# this example demonstrates how users can avoid unnecessary targets
 cmake(
+    # expect to find ./lib/hello.lib as the result of the build
     name = "sdl",
-    build_args = [
-        "--verbose",
-        "--",  # <- Pass remaining options to the native tool.
-        "-j 1",
+    # This option can be omitted
+    generate_args = [
+        "-G \"Visual Studio 17 2022\"",
+        "-A Win64",
     ],
-    cache_entries = select({
-        "@bazel_tools//src/conditions:windows": {
-            "CMAKE_BUILD_TYPE": "Release",
-            # "CMAKE_CXX_FLAGS": "/MD",
-            # "CMAKE_CXX_FLAGS_DEBUG": "/MD",
-        },
-        "//conditions:default": {},
-    }),
-    # generate_args = select({
-    #     "@bazel_tools//src/conditions:windows": [
-    #         "-GNinja",
-    #         # "-A x64",
-    #     ],
-    #     "//conditions:default": [],
-    # }),
     lib_source = ":srcs",
 )
+
+cmake(
+    name = "sdl_ninja",
+    # expect to find ./lib/hello.lib as the result of the build
+    lib_name = "sdl",
+    # explicitly specify the generator
+    generate_args = ["-GNinja"],
+    lib_source = ":srcs",
+)
+
