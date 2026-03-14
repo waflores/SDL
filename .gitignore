@@ -171,3 +171,6 @@ test/torturethread
 docs/output
 SDL.tag
 doxygen_warn.txt
+
+# Ignore user bazel config
+user.bazelrc

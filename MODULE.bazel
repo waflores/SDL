@@ -1,4 +1,59 @@
+# buildifier: disable=module-docstring
 module(
     name = "sdl",
 )
-bazel_dep(name = "rules_foreign_cc", version = "0.15.0")
+
+# https://github.com/bazelbuild/bazel-skylib
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+
+# https://github.com/bazelbuild/rules_cc
+bazel_dep(name = "rules_cc", version = "0.2.17")
+single_version_override(
+    module_name = "rules_cc",
+    patch_strip = 1,
+    patches = ["bazel/patches/rules_cc-windows_support.patch"],  # Add Windows support, patch of https://github.com/bazel-contrib/toolchains_llvm/pull/642
+)
+
+cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
+use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
+
+register_toolchains("@local_config_cc_toolchains//:all")
+
+# https://github.com/bazelbuild/platforms
+bazel_dep(name = "platforms", version = "1.0.0")
+
+# https://github.com/keith/buildifier-prebuilt
+bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.2")
+
+# This LLVM toolchain provides a cross platform Hermetic C/C++ compiler
+# https://github.com/cerisier/toolchains_llvm_bootstrapped
+bazel_dep(name = "llvm", version = "0.6.7")
+git_override(
+    module_name = "llvm",
+    commit = "e0cb05211b9b85b5aa4e24b758c035b64eeb7ac3",
+    remote = "https://github.com/cerisier/toolchains_llvm_bootstrapped.git",
+)
+
+register_toolchains("@llvm//toolchain:all")
+
+# Hedron's Compile Commands Extractor for Bazel
+# https://github.com/hedronvision/bazel-compile-commands-extractor
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "7fe1eab26d2b8eeb5e1c6a2f38bddb001e3f9696",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+)
+# bazel run @hedron_compile_commands//:refresh_all
+
+# https://github.com/bazel-contrib/rules_foreign_cc
+bazel_dep(name = "rules_foreign_cc")
+git_override(
+    module_name = "rules_foreign_cc",
+    commit = "16566f37f1220b996efc265ab848a2d3f52a488c",
+    remote = "https://github.com/bazel-contrib/rules_foreign_cc.git",
+)
+
+tools = use_extension("@rules_foreign_cc//foreign_cc:extensions.bzl", "tools")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")

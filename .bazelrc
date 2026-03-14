@@ -1,19 +1,73 @@
-common --enable_platform_specific_config --repo_env=LC_ALL="en_US.UTF-8"
-startup --windows_enable_symlinks # --host_jvm_args=-Djavax.net.ssl.trustStoreType=WINDOWS-ROOT
-startup --output_user_root=C:/bzl
-common --show_timestamps --verbose_failures
+########################
+# Project-specific flags
 
-common --noincompatible_disallow_empty_glob
+# Starting with Bazel 8, Windows requires this flag in order
+# for symlinks to work properly (namely, so that sh_test with
+# py_binary as a data dependency gets symlinks that are executable)
+startup --windows_enable_symlinks
+startup --noautodetect_server_javabase
+
+common --announce_rc --show_timestamps
+
+common --verbose_failures
+
+# Enable Bzlmod for every Bazel command
+common --enable_bzlmod --noenable_workspace
+
+# Tell Bazel to not detect the CC toolchain automatically from the host machine to improve hermeticity.
+# This requires you to declare and register a CC toolchain explicitly.
+common --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+
+# Enable Debug Fission
+common:linux --fission=yes
+common --compilation_mode=dbg
+common:linux --config=clang  # Use the clang args
+
+# Turn on all the strict error checking for CC
+common:clang --copt=-g3  # Add more debug stuff
+# common --copt=-pedantic-errors
+common:clang --cxxopt=-std=c++23
+common:clang --cxxopt=-Weffc++
+common:clang --cxxopt=-Wextra
+common:clang --cxxopt=-Wconversion
+common:clang --cxxopt=-Wsign-conversion
+common:clang --cxxopt=-Werror
+
+# C Options
+common:clang --conlyopt=-std=c23  # Needed for c programs and not angering c++ ones
+
 common:windows --enable_runfiles # https://github.com/bazelbuild/bazel/issues/8843
 
 # Visual Studio 2022
 ## NOTE: We need to have WSL running in the background for some of the compilation process
-build:windows --define compiler=vs2022
-build:windows --cxxopt=/std:c++20  # Qt requires a C++17 compiler, and a suitable value for __cplusplus.
-build:windows --cxxopt=/Zc:__cplusplus #  On MSVC, you must pass the /Zc:__cplusplus option to the compiler.
-build:windows --cxxopt=/permissive-  # QtCore/qglobal.h(120): error C2338
-build:windows --cxxopt=/Zc:__cplusplus
-build:windows --copt=-DWIN32_LEAN_AND_MEAN
-build:windows --copt=-DNOGDI
-build:windows --host_copt=-DWIN32_LEAN_AND_MEAN
-build:windows --host_copt=-DNOGDI
+# common:windows --define compiler=vs2022
+common:clang_windows --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=0
+common:cl_windows --cxxopt=/std:c++20  # Qt requires a C++17 compiler, and a suitable value for __cplusplus.
+common:cl_windows --cxxopt=/Zc:__cplusplus #  On MSVC, you must pass the /Zc:__cplusplus option to the compiler.
+common:cl_windows --cxxopt=/permissive-  # QtCore/qglobal.h(120): error C2338
+common:cl_windows --cxxopt=/Z7
+common:cl_windows --copt=-DWIN32_LEAN_AND_MEAN
+common:cl_windows --host_copt=-DWIN32_LEAN_AND_MEAN
+common:cl_windows --host_cxxopt=/std:c++23
+
+###### This block of code works when we have rules_cc local_config_cc enabled
+# As of bazel 7, toolchain resolution is enabled by default, so we need to define a platform for
+# the clang-cl build.
+build:clang_windows --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl
+build:clang_windows --extra_execution_platforms=//:x64_windows-clang-cl
+build:clang_windows --config=cl_windows  # add the CL version of CC Flags
+###### End block of rules_cc local_config_cc enablement
+
+##### This block is for regular Windows toolchain
+common:plain_windows --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=0
+build:plain_windows --extra_toolchains=@local_config_cc_toolchains//:cc-toolchain-x64_windows
+build:plain_windows --extra_execution_platforms=//:x64_windows-msvc
+build:plain_windows --define compiler=vs2022
+build:plain_windows --config=cl_windows
+
+# Ignore all warnings in third-party code.
+common --per_file_copt=external/.*@-w
+common --host_per_file_copt=external/.*@-w
+
+
+try-import %workspace%/user.bazelrc

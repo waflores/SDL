@@ -5,6 +5,7 @@ filegroup(
     srcs = glob(["**"]),
     visibility = ["//visibility:public"],
 )
+
 cmake(
     # expect to find ./lib/hello.lib as the result of the build
     name = "sdl",
@@ -18,10 +19,29 @@ cmake(
 
 cmake(
     name = "sdl_ninja",
-    # expect to find ./lib/hello.lib as the result of the build
-    lib_name = "sdl",
     # explicitly specify the generator
     generate_args = ["-GNinja"],
+    # expect to find ./lib/hello.lib as the result of the build
+    lib_name = "sdl",
     lib_source = ":srcs",
 )
 
+platform(
+    name = "x64_windows-clang-cl",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+        "@bazel_tools//tools/cpp:clang-cl",  # Alias to the @rules_cc constraint in Bazel 8+
+    ],
+    visibility = ["//visibility:public"],
+)
+
+platform(
+    name = "x64_windows-msvc",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+        "@rules_cc//cc/private/toolchain:msvc",  # Alias to the @rules_cc constraint in Bazel 8+
+    ],
+    visibility = ["//visibility:public"],
+)
