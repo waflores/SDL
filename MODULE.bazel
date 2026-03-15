@@ -50,10 +50,8 @@ git_override(
 bazel_dep(name = "rules_foreign_cc")
 git_override(
     module_name = "rules_foreign_cc",
-    commit = "599e636d45f64e38d74a54208d2e8037d017bf94",
-    remote = "https://github.com/bazel-contrib/rules_foreign_cc.git",
-    patches = ["rules_foreign_cc-bzlv9.patch"],
-    patch_strip = 1,
+    commit = "75b9de6086d13769a89916bb2519a80dacfea922",
+    remote = "https://github.com/waflores/rules_foreign_cc.git",
 )
 
 tools = use_extension("@rules_foreign_cc//foreign_cc:extensions.bzl", "tools")

@@ -18,15 +18,6 @@ cmake(
     visibility = ["//visibility:public"],
 )
 
-cmake(
-    name = "sdl_ninja",
-    # explicitly specify the generator
-    generate_args = ["-GNinja"],
-    # expect to find ./lib/hello.lib as the result of the build
-    lib_name = "sdl",
-    lib_source = ":srcs",
-)
-
 platform(
     name = "x64_windows-msvc",
     constraint_values = [
