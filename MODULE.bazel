@@ -46,11 +46,13 @@ git_override(
 )
 # bazel run @hedron_compile_commands//:refresh_all
 
+bazel_dep(name = "rules_go", version = "0.60.0")
+
 # https://github.com/bazel-contrib/rules_foreign_cc
 bazel_dep(name = "rules_foreign_cc")
 git_override(
     module_name = "rules_foreign_cc",
-    commit = "75b9de6086d13769a89916bb2519a80dacfea922",
+    commit = "4c0d1157f10b70f0cf42b90fe4ac1c2eb3eeae61",
     remote = "https://github.com/waflores/rules_foreign_cc.git",
 )
 
@@ -74,4 +76,4 @@ bazel_dep(name = "rules_cc_autoconf", version = "0.5.6")
 bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "wayland", version = "1.24.0.bcr.1")
 bazel_dep(name = "xkbcommon", version = "1.9.2.bcr.beta.1")
-# bazel_dep(name = "glib", version = "2.82.2.bcr.8")
+bazel_dep(name = "aspect_rules_lint", version = "2.3.0")

@@ -7,7 +7,7 @@ filegroup(
 )
 
 cmake(
-    # expect to find ./lib/hello.lib as the result of the build
+    # expect to find ./lib/sdl3.lib as the result of the build
     name = "sdl3",
     # This option can be omitted
     generate_args = [
@@ -15,8 +15,27 @@ cmake(
         "-A Win64",
     ],
     lib_source = ":srcs",
-    visibility = ["//visibility:public"],
 )
+
+cmake(
+    name = "sdl3_ninja",
+    # expect to find ./lib/sdl3.lib as the result of the build
+    lib_name = "sdl3",
+    # explicitly specify the generator
+    generate_args = ["-GNinja"],
+    lib_source = ":srcs",
+)
+
+cmake(
+    name = "sdl3_nmake",
+    # explicitly specify the generator
+    generate_args = ["-G \"NMake Makefiles\""],
+    lib_source = ":srcs",
+    # expect to find ./lib/sdl3.lib as the result of the build
+    out_static_libs = ["sdl3.lib"],
+)
+
+
 
 platform(
     name = "x64_windows-msvc",
